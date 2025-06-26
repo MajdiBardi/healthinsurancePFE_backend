@@ -1,0 +1,10 @@
+spring:
+  application:
+    name: user
+  config:
+    import: optional:configserver:http://localhost:8888
+
+logging:
+  level:
+    root: INFO
+    org.springframework.cloud.config.client.ConfigServicePropertySourceLocator: DEBUG

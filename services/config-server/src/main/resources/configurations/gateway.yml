@@ -1,0 +1,32 @@
+server:
+  port: 8222
+
+spring:
+  application:
+    name: gateway
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+      routes:
+        - id: contract-service
+          uri: lb://CONTRACT
+          predicates:
+            - Path=/api/contracts/**
+
+        - id: user-service
+          uri: lb://USER
+          predicates:
+            - Path=/api/users/**
+
+        - id: payment-service
+          uri: lb://PAYMENT
+          predicates:
+            - Path=/api/payments/**
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://localhost:8180/realms/assurance_vie/protocol/openid-connect/certs
