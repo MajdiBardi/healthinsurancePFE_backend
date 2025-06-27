@@ -4,24 +4,27 @@ server:
 spring:
   application:
     name: gateway
+
   cloud:
     gateway:
       discovery:
         locator:
           enabled: true
+          lower-case-service-id: true
+
       routes:
         - id: contract-service
-          uri: lb://CONTRACT
+          uri: lb://contract
           predicates:
-            - Path=/api/contracts/**
+            - Path=/api/contracts/**  # pas de StripPrefix
 
         - id: user-service
-          uri: lb://USER
+          uri: lb://user
           predicates:
             - Path=/api/users/**
 
         - id: payment-service
-          uri: lb://PAYMENT
+          uri: lb://payment
           predicates:
             - Path=/api/payments/**
 
@@ -30,3 +33,8 @@ spring:
       resourceserver:
         jwt:
           jwk-set-uri: http://localhost:8180/realms/assurance_vie/protocol/openid-connect/certs
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka
