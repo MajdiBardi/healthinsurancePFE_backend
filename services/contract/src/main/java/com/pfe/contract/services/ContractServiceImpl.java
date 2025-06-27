@@ -5,7 +5,6 @@ import com.pfe.contract.dtos.ContractResponseDto;
 import com.pfe.contract.dtos.UserDto;
 import com.pfe.contract.entities.Contract;
 import com.pfe.contract.repositories.ContractRepository;
-import com.pfe.contract.services.ContractService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -24,24 +23,27 @@ public class ContractServiceImpl implements ContractService {
     }
 
     @Override
-    public Contract updateContract(String id, Contract contract) {
+    public Contract updateContract(Long id, Contract contract) {
         Contract existing = contractRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Contract not found"));
+
         existing.setCreationDate(contract.getCreationDate());
         existing.setEndDate(contract.getEndDate());
         existing.setStatus(contract.getStatus());
         existing.setClientId(contract.getClientId());
         existing.setInsurerId(contract.getInsurerId());
+        existing.setBeneficiaryId(contract.getBeneficiaryId());
+
         return contractRepository.save(existing);
     }
 
     @Override
-    public void deleteContract(String id) {
+    public void deleteContract(Long id) {
         contractRepository.deleteById(id);
     }
 
     @Override
-    public Contract getContractById(String id) {
+    public Contract getContractById(Long id) {
         return contractRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Contract not found"));
     }
@@ -50,7 +52,9 @@ public class ContractServiceImpl implements ContractService {
     public List<Contract> getAllContracts() {
         return contractRepository.findAll();
     }
-    public ContractResponseDto getContractDetails(String id) {
+
+    @Override
+    public ContractResponseDto getContractDetails(Long id) {
         Contract contract = contractRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Contract not found"));
 
@@ -63,7 +67,6 @@ public class ContractServiceImpl implements ContractService {
         dto.setCreationDate(contract.getCreationDate());
         dto.setEndDate(contract.getEndDate());
         dto.setStatus(contract.getStatus());
-
 
         dto.setClientId(client.getId());
         dto.setClientName(client.getName());

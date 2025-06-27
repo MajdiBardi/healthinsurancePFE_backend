@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -19,32 +20,34 @@ public class ContractController {
 
     // ✅ CREATE
     @PostMapping
-    public ResponseEntity<Contract> createContract(@RequestBody ContractRequestDto dto) {
+    public ResponseEntity<ContractResponseDto> createContract(@RequestBody ContractRequestDto dto) {
         Contract contract = mapDtoToEntity(dto);
-        return ResponseEntity.ok(contractService.createContract(contract));
+        Contract created = contractService.createContract(contract);
+        return ResponseEntity.ok(mapEntityToDto(created));
     }
+
+    // ✅ Détails enrichis (client, assureur, bénéficiaire)
     @GetMapping("/{id}/details")
-    public ResponseEntity<ContractResponseDto> getContractDetails(@PathVariable String id) {
+    public ResponseEntity<ContractResponseDto> getContractDetails(@PathVariable Long id) {
         return ResponseEntity.ok(contractService.getContractDetails(id));
     }
 
-
     // ✅ UPDATE
     @PutMapping("/{id}")
-    public ResponseEntity<Contract> updateContract(@PathVariable String id, @RequestBody ContractRequestDto dto) {
+    public ResponseEntity<Contract> updateContract(@PathVariable Long id, @RequestBody ContractRequestDto dto) {
         Contract contract = mapDtoToEntity(dto);
         return ResponseEntity.ok(contractService.updateContract(id, contract));
     }
 
     // ✅ READ
     @GetMapping("/{id}")
-    public ResponseEntity<Contract> getContract(@PathVariable String id) {
+    public ResponseEntity<Contract> getContract(@PathVariable Long id) {
         return ResponseEntity.ok(contractService.getContractById(id));
     }
 
     // ✅ DELETE
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteContract(@PathVariable String id) {
+    public ResponseEntity<Void> deleteContract(@PathVariable Long id) {
         contractService.deleteContract(id);
         return ResponseEntity.noContent().build();
     }
@@ -55,15 +58,28 @@ public class ContractController {
         return ResponseEntity.ok(contractService.getAllContracts());
     }
 
-    // 🧱 Méthode utilitaire pour conversion DTO → Entity
+    // 🔁 Méthode utilitaire : DTO → Entity
     private Contract mapDtoToEntity(ContractRequestDto dto) {
         Contract contract = new Contract();
         contract.setClientId(dto.getClientId());
         contract.setInsurerId(dto.getInsurerId());
         contract.setBeneficiaryId(dto.getBeneficiaryId());
-        contract.setCreationDate(dto.getCreationDate());
-        contract.setEndDate(dto.getEndDate());
+        contract.setCreationDate(LocalDate.parse(dto.getCreationDate()));  // ← parse manuellement
+        contract.setEndDate(LocalDate.parse(dto.getEndDate()));
         contract.setStatus(dto.getStatus());
         return contract;
+    }
+
+    // 🔁 Méthode utilitaire : Entity → DTO
+    private ContractResponseDto mapEntityToDto(Contract contract) {
+        ContractResponseDto dto = new ContractResponseDto();
+        dto.setId(contract.getId());
+        dto.setClientId(contract.getClientId());
+        dto.setInsurerId(contract.getInsurerId());
+        dto.setBeneficiaryId(contract.getBeneficiaryId());
+        dto.setCreationDate(contract.getCreationDate());
+        dto.setEndDate(contract.getEndDate());
+        dto.setStatus(contract.getStatus());
+        return dto;
     }
 }

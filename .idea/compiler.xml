@@ -11,6 +11,7 @@
         <module name="payment" />
         <module name="discovery" />
         <module name="gateway" />
+        <module name="notifications" />
       </profile>
       <profile name="Annotation profile for User" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
@@ -34,6 +35,7 @@
       <module name="contract" options="-parameters" />
       <module name="discovery" options="-parameters" />
       <module name="gateway" options="-parameters" />
+      <module name="notifications" options="-parameters" />
       <module name="payment" options="-parameters" />
       <module name="user" options="-parameters" />
     </option>
