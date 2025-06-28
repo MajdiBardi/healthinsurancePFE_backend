@@ -26,4 +26,7 @@ public class Contract {
 
     @Column(name = "beneficiary_id")
     private String beneficiaryId;
+
+    @Column(nullable = false)
+    private Double montant;  // ✅ Nouveau champ ajouté
 }

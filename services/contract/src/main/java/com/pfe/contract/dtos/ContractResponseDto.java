@@ -25,4 +25,6 @@ public class ContractResponseDto {
 
     private String beneficiaryId;
     private String beneficiaryName;
+
+    private Double montant;  // ✅ Nouveau champ ajouté
 }

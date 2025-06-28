@@ -33,6 +33,7 @@ public class ContractServiceImpl implements ContractService {
         existing.setClientId(contract.getClientId());
         existing.setInsurerId(contract.getInsurerId());
         existing.setBeneficiaryId(contract.getBeneficiaryId());
+        existing.setMontant(contract.getMontant());  // ✅ Ajout du montant
 
         return contractRepository.save(existing);
     }
@@ -67,6 +68,7 @@ public class ContractServiceImpl implements ContractService {
         dto.setCreationDate(contract.getCreationDate());
         dto.setEndDate(contract.getEndDate());
         dto.setStatus(contract.getStatus());
+        dto.setMontant(contract.getMontant());  // ✅ Ajout dans la réponse
 
         dto.setClientId(client.getId());
         dto.setClientName(client.getName());

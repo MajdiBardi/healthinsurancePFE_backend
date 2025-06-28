@@ -26,7 +26,7 @@ public class ContractController {
         return ResponseEntity.ok(mapEntityToDto(created));
     }
 
-    // ✅ Détails enrichis (client, assureur, bénéficiaire)
+    // ✅ Détails enrichis
     @GetMapping("/{id}/details")
     public ResponseEntity<ContractResponseDto> getContractDetails(@PathVariable Long id) {
         return ResponseEntity.ok(contractService.getContractDetails(id));
@@ -64,9 +64,10 @@ public class ContractController {
         contract.setClientId(dto.getClientId());
         contract.setInsurerId(dto.getInsurerId());
         contract.setBeneficiaryId(dto.getBeneficiaryId());
-        contract.setCreationDate(LocalDate.parse(dto.getCreationDate()));  // ← parse manuellement
+        contract.setCreationDate(LocalDate.parse(dto.getCreationDate()));
         contract.setEndDate(LocalDate.parse(dto.getEndDate()));
         contract.setStatus(dto.getStatus());
+        contract.setMontant(dto.getMontant()); // ✅ Ajout montant
         return contract;
     }
 
@@ -80,6 +81,7 @@ public class ContractController {
         dto.setCreationDate(contract.getCreationDate());
         dto.setEndDate(contract.getEndDate());
         dto.setStatus(contract.getStatus());
+        dto.setMontant(contract.getMontant()); // ✅ Ajout montant
         return dto;
     }
 }
