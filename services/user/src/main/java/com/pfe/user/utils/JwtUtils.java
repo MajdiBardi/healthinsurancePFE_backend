@@ -1,42 +1,60 @@
 package com.pfe.user.utils;
 
-
-
-import org.springframework.context.annotation.Configuration;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.stereotype.Component;
 
 import java.util.Base64;
-@Configuration
 
+@Component
 public class JwtUtils {
 
-    public static String extractUserId(String token) {
-        return extractClaim(token, "sub"); // ou "userId" selon ton JWT
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
+    public String extractUserId(String token) {
+        return extractSimpleClaim(token, "sub");
     }
 
-    public static String extractEmail(String token) {
-        return extractClaim(token, "email");
+    public String extractEmail(String token) {
+        return extractSimpleClaim(token, "email");
     }
 
-    public static String extractName(String token) {
-        return extractClaim(token, "name");
+    public String extractName(String token) {
+        return extractSimpleClaim(token, "name");
     }
 
-    public static String extractRole(String token) {
-        return extractClaim(token, "role");
-    }
-
-    private static String extractClaim(String token, String claimKey) {
+    public String extractRole(String token) {
         try {
-            String[] parts = token.replace("Bearer ", "").split("\\.");
-            String payload = new String(Base64.getUrlDecoder().decode(parts[1]));
-            // Extrait la valeur du champ claimKey dans le JSON (très basique)
-            int start = payload.indexOf("\"" + claimKey + "\":");
-            if (start == -1) return null;
-            int startQuote = payload.indexOf("\"", start + claimKey.length() + 3);
-            int endQuote = payload.indexOf("\"", startQuote + 1);
-            return payload.substring(startQuote + 1, endQuote);
+            JsonNode payload = extractPayload(token);
+            JsonNode roles = payload
+                    .path("realm_access")
+                    .path("roles");
+
+            if (roles.isArray()) {
+                for (JsonNode roleNode : roles) {
+                    String role = roleNode.asText().toUpperCase();
+                    if (role.matches("ADMIN|CLIENT|INSURER|BENEFICIARY")) {
+                        return role;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    private String extractSimpleClaim(String token, String key) {
+        try {
+            return extractPayload(token).path(key).asText(null);
         } catch (Exception e) {
             return null;
         }
+    }
+
+    private JsonNode extractPayload(String token) throws Exception {
+        String[] parts = token.replace("Bearer ", "").split("\\.");
+        String json = new String(Base64.getUrlDecoder().decode(parts[1]));
+        return objectMapper.readTree(json);
     }
 }
