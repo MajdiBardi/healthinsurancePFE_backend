@@ -81,4 +81,9 @@ public class ContractServiceImpl implements ContractService {
 
         return dto;
     }
+    @Override
+    public List<Contract> getContractsByClientId(String clientId) {
+        return contractRepository.findByClientId(clientId);
+    }
+
 }

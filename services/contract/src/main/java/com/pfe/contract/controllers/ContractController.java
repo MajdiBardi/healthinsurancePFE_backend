@@ -6,6 +6,8 @@ import com.pfe.contract.entities.Contract;
 import com.pfe.contract.services.ContractService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -14,48 +16,63 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/contracts")
 @RequiredArgsConstructor
+
 public class ContractController {
 
     private final ContractService contractService;
 
-    // ✅ CREATE
+    // ✅ CREATE - accessible par ADMIN ou INSURER
     @PostMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'INSURER')")
     public ResponseEntity<ContractResponseDto> createContract(@RequestBody ContractRequestDto dto) {
         Contract contract = mapDtoToEntity(dto);
         Contract created = contractService.createContract(contract);
         return ResponseEntity.ok(mapEntityToDto(created));
     }
 
-    // ✅ Détails enrichis
+    // ✅ DÉTAILS enrichis - accessible par ADMIN ou INSURER
     @GetMapping("/{id}/details")
+    @PreAuthorize("hasAnyRole('ADMIN', 'INSURER')")
     public ResponseEntity<ContractResponseDto> getContractDetails(@PathVariable Long id) {
         return ResponseEntity.ok(contractService.getContractDetails(id));
     }
 
-    // ✅ UPDATE
+    // ✅ UPDATE - accessible par ADMIN uniquement
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Contract> updateContract(@PathVariable Long id, @RequestBody ContractRequestDto dto) {
         Contract contract = mapDtoToEntity(dto);
         return ResponseEntity.ok(contractService.updateContract(id, contract));
     }
 
-    // ✅ READ
+    // ✅ GET by ID - accessible par ADMIN ou INSURER
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'INSURER')")
     public ResponseEntity<Contract> getContract(@PathVariable Long id) {
         return ResponseEntity.ok(contractService.getContractById(id));
     }
 
-    // ✅ DELETE
+    // ✅ DELETE - accessible par ADMIN uniquement
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteContract(@PathVariable Long id) {
         contractService.deleteContract(id);
         return ResponseEntity.noContent().build();
     }
 
-    // ✅ LIST
+    // ✅ LIST ALL - accessible par ADMIN ou INSURER
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'INSURER')")
     public ResponseEntity<List<Contract>> getAllContracts() {
         return ResponseEntity.ok(contractService.getAllContracts());
+    }
+
+    // ✅ CLIENT : voir uniquement ses propres contrats
+    @GetMapping("/my-contracts")
+    @PreAuthorize("hasRole('CLIENT')")
+    public ResponseEntity<List<Contract>> getMyContracts(Authentication authentication) {
+        String userId = authentication.getName(); // keycloak ID
+        return ResponseEntity.ok(contractService.getContractsByClientId(userId));
     }
 
     // 🔁 Méthode utilitaire : DTO → Entity
@@ -67,7 +84,7 @@ public class ContractController {
         contract.setCreationDate(LocalDate.parse(dto.getCreationDate()));
         contract.setEndDate(LocalDate.parse(dto.getEndDate()));
         contract.setStatus(dto.getStatus());
-        contract.setMontant(dto.getMontant()); // ✅ Ajout montant
+        contract.setMontant(dto.getMontant());
         return contract;
     }
 
@@ -81,7 +98,7 @@ public class ContractController {
         dto.setCreationDate(contract.getCreationDate());
         dto.setEndDate(contract.getEndDate());
         dto.setStatus(contract.getStatus());
-        dto.setMontant(contract.getMontant()); // ✅ Ajout montant
+        dto.setMontant(contract.getMontant());
         return dto;
     }
 }

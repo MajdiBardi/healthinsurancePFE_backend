@@ -26,7 +26,7 @@ public class SecurityConfig {
                 .csrf().disable()
                 .authorizeHttpRequests(auth -> auth
                         // autorise les appels vers les endpoints spécifiques à un rôle
-                        .requestMatchers("/api/contracts/**").hasRole("ADMIN") // ou "AGENT", selon ton besoin
+                        // ou "AGENT", selon ton besoin
                         .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(oauth2 ->
@@ -54,6 +54,7 @@ public class SecurityConfig {
             });
         }};
     }
+
 
 
 }

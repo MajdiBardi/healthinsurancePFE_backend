@@ -12,4 +12,6 @@ public interface ContractService {
     Contract getContractById(Long id);
     List<Contract> getAllContracts();
     ContractResponseDto getContractDetails(Long id);
+    List<Contract> getContractsByClientId(String clientId);
+
 }

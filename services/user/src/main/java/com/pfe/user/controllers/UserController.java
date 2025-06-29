@@ -29,13 +29,13 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'INSURER')")
     public ResponseEntity<UserDto> getUser(@PathVariable String id) {
         return ResponseEntity.ok(userService.getUserById(id));
     }
 
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'INSURER')")
     public ResponseEntity<List<UserDto>> getAll() {
         return ResponseEntity.ok(userService.getAllUsers());
     }
@@ -61,19 +61,19 @@ public class UserController {
 
     // ✅ Nouveaux endpoints spécifiques pour filtrer par rôle
     @GetMapping("/clients")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'INSURER')")
     public ResponseEntity<List<UserDto>> getClients() {
         return ResponseEntity.ok(userService.getUsersByRole("CLIENT"));
     }
 
     @GetMapping("/insurers")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'INSURER')")
     public ResponseEntity<List<UserDto>> getInsurers() {
         return ResponseEntity.ok(userService.getUsersByRole("INSURER"));
     }
 
     @GetMapping("/beneficiaries")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'INSURER')")
     public ResponseEntity<List<UserDto>> getBeneficiaries() {
         return ResponseEntity.ok(userService.getUsersByRole("BENEFICIARY"));
     }

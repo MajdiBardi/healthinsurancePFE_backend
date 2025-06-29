@@ -2,7 +2,10 @@ package com.pfe.user.utils;
 
 
 
+import org.springframework.context.annotation.Configuration;
+
 import java.util.Base64;
+@Configuration
 
 public class JwtUtils {
 
