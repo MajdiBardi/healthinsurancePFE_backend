@@ -16,12 +16,10 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/contracts")
 @RequiredArgsConstructor
-
 public class ContractController {
 
     private final ContractService contractService;
 
-    // ✅ CREATE - accessible par ADMIN ou INSURER
     @PostMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'INSURER')")
     public ResponseEntity<ContractResponseDto> createContract(@RequestBody ContractRequestDto dto) {
@@ -30,14 +28,12 @@ public class ContractController {
         return ResponseEntity.ok(mapEntityToDto(created));
     }
 
-    // ✅ DÉTAILS enrichis - accessible par ADMIN ou INSURER
     @GetMapping("/{id}/details")
     @PreAuthorize("hasAnyRole('ADMIN', 'INSURER')")
     public ResponseEntity<ContractResponseDto> getContractDetails(@PathVariable Long id) {
         return ResponseEntity.ok(contractService.getContractDetails(id));
     }
 
-    // ✅ UPDATE - accessible par ADMIN uniquement
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Contract> updateContract(@PathVariable Long id, @RequestBody ContractRequestDto dto) {
@@ -45,14 +41,12 @@ public class ContractController {
         return ResponseEntity.ok(contractService.updateContract(id, contract));
     }
 
-    // ✅ GET by ID - accessible par ADMIN ou INSURER
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'INSURER')")
     public ResponseEntity<Contract> getContract(@PathVariable Long id) {
         return ResponseEntity.ok(contractService.getContractById(id));
     }
 
-    // ✅ DELETE - accessible par ADMIN uniquement
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteContract(@PathVariable Long id) {
@@ -60,35 +54,55 @@ public class ContractController {
         return ResponseEntity.noContent().build();
     }
 
-    // ✅ LIST ALL - accessible par ADMIN ou INSURER
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'INSURER')")
     public ResponseEntity<List<Contract>> getAllContracts() {
         return ResponseEntity.ok(contractService.getAllContracts());
     }
 
-    // ✅ CLIENT : voir uniquement ses propres contrats
     @GetMapping("/my-contracts")
     @PreAuthorize("hasRole('CLIENT')")
     public ResponseEntity<List<Contract>> getMyContracts(Authentication authentication) {
-        String userId = authentication.getName(); // keycloak ID
+        String userId = authentication.getName();
         return ResponseEntity.ok(contractService.getContractsByClientId(userId));
     }
 
-    // 🔁 Méthode utilitaire : DTO → Entity
+    // 🔁 DTO → Entity avec calcul de date
     private Contract mapDtoToEntity(ContractRequestDto dto) {
         Contract contract = new Contract();
         contract.setClientId(dto.getClientId());
         contract.setInsurerId(dto.getInsurerId());
         contract.setBeneficiaryId(dto.getBeneficiaryId());
-        contract.setCreationDate(LocalDate.parse(dto.getCreationDate()));
-        contract.setEndDate(LocalDate.parse(dto.getEndDate()));
-        contract.setStatus(dto.getStatus());
+
+        // ✅ Création : aujourd’hui
+        LocalDate creationDate = LocalDate.now();
+        contract.setCreationDate(creationDate);
+
+        // ✅ Calcul de endDate à partir de duration
+        LocalDate endDate = calculateEndDateFromDuration(creationDate, dto.getDuration());
+        contract.setEndDate(endDate);
+
+        // ✅ Calcul automatique du statut
+        String status = LocalDate.now().isBefore(endDate) ? "ACTIVE" : "INACTIVE";
+        contract.setStatus(status);
+
         contract.setMontant(dto.getMontant());
         return contract;
     }
 
-    // 🔁 Méthode utilitaire : Entity → DTO
+
+    private LocalDate calculateEndDateFromDuration(LocalDate creationDate, String duration) {
+        return switch (duration.toLowerCase()) {
+            case "6 mois" -> creationDate.plusMonths(6);
+            case "1 an" -> creationDate.plusYears(1);
+            case "2 ans" -> creationDate.plusYears(2);
+            case "3 ans" -> creationDate.plusYears(3);
+            case "4 ans" -> creationDate.plusYears(4);
+            case "5 ans" -> creationDate.plusYears(5);
+            default -> throw new IllegalArgumentException("Durée invalide : " + duration);
+        };
+    }
+
     private ContractResponseDto mapEntityToDto(Contract contract) {
         ContractResponseDto dto = new ContractResponseDto();
         dto.setId(contract.getId());
