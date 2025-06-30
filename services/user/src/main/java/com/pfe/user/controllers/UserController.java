@@ -19,7 +19,8 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping("/me")
-    public ResponseEntity<UserDto> getCurrentUser(@RequestHeader("Authorization") String token) {
+    public ResponseEntity<UserDto> getCurrentUser(@RequestHeader("Authorization") String authHeader) {
+        String token = authHeader.replace("Bearer ", "").trim();  // 🔥 enlève le préfixe "Bearer "
         return ResponseEntity.ok(userService.getOrCreateCurrentUser(token));
     }
 
@@ -77,4 +78,5 @@ public class UserController {
     public ResponseEntity<List<UserDto>> getBeneficiaries() {
         return ResponseEntity.ok(userService.getUsersByRole("BENEFICIARY"));
     }
+
 }

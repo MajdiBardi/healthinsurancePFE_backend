@@ -19,16 +19,26 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto getOrCreateCurrentUser(String token) {
+        System.out.println("✅ TOKEN reçu: " + token);
+
         String userId = jwtUtils.extractUserId(token);
+        System.out.println("🧠 ID extrait: " + userId);
+
         return userRepository.findById(userId)
-                .map(this::mapToDto)
+                .map(user -> {
+                    System.out.println("🔄 Utilisateur déjà existant: " + user.getEmail());
+                    return mapToDto(user);
+                })
                 .orElseGet(() -> {
+                    System.out.println("🆕 Création d’un nouvel utilisateur...");
                     User user = new User();
                     user.setId(userId);
                     user.setName(jwtUtils.extractName(token));
                     user.setEmail(jwtUtils.extractEmail(token));
                     user.setRole(jwtUtils.extractRole(token));
-                    return mapToDto(userRepository.save(user));
+                    User saved = userRepository.save(user);
+                    System.out.println("✅ Utilisateur enregistré: " + saved.getEmail());
+                    return mapToDto(saved);
                 });
     }
 

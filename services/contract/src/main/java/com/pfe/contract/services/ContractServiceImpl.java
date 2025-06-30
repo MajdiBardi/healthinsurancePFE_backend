@@ -1,6 +1,10 @@
 package com.pfe.contract.services;
 
+import com.pfe.contract.clients.NotificationClient;
+import com.pfe.contract.clients.UserClient;
 import com.pfe.contract.dtos.ContractResponseDto;
+import com.pfe.contract.dtos.NotificationEmailRequest;
+import com.pfe.contract.dtos.UserDto;
 import com.pfe.contract.entities.Contract;
 import com.pfe.contract.repositories.ContractRepository;
 import lombok.RequiredArgsConstructor;
@@ -14,11 +18,15 @@ import java.util.List;
 public class ContractServiceImpl implements ContractService {
 
     private final ContractRepository contractRepository;
+    private final NotificationClient notificationClient;
+    private final UserClient userClient; // ✅ Injecté ici
 
     @Override
     public Contract createContract(Contract contract) {
-        contract.setCreationDate(LocalDate.now()); // ✅ Date de création automatique
-        return contractRepository.save(contract);
+        contract.setCreationDate(LocalDate.now());
+        Contract saved = contractRepository.save(contract);
+        sendNotificationEmail(saved); // Envoi email avec vraie adresse
+        return saved;
     }
 
     @Override
@@ -51,15 +59,16 @@ public class ContractServiceImpl implements ContractService {
     public List<Contract> getAllContracts() {
         List<Contract> contracts = contractRepository.findAll();
         for (Contract c : contracts) {
-            c.setStatus(LocalDate.now().isBefore(c.getEndDate()) ? "ACTIVE" : "INACTIVE");
+            updateStatusIfExpired(c);
         }
         return contracts;
     }
 
-
     @Override
     public ContractResponseDto getContractDetails(Long id) {
         Contract contract = getContractById(id);
+        updateStatusIfExpired(contract);
+
         ContractResponseDto dto = new ContractResponseDto();
         dto.setId(contract.getId());
         dto.setClientId(contract.getClientId());
@@ -74,6 +83,29 @@ public class ContractServiceImpl implements ContractService {
 
     @Override
     public List<Contract> getContractsByClientId(String clientId) {
-        return contractRepository.findByClientId(clientId);
+        List<Contract> contracts = contractRepository.findByClientId(clientId);
+        for (Contract c : contracts) {
+            updateStatusIfExpired(c);
+        }
+        return contracts;
+    }
+
+    // ✅ Met à jour dynamiquement le statut
+    private void updateStatusIfExpired(Contract contract) {
+        LocalDate now = LocalDate.now();
+        if (contract.getEndDate() != null) {
+            contract.setStatus(now.isBefore(contract.getEndDate()) ? "ACTIVE" : "INACTIVE");
+        }
+    }
+
+    // ✅ Appel réel au UserService pour récupérer l’email
+    private void sendNotificationEmail(Contract contract) {
+        UserDto user = userClient.getUserById(contract.getClientId());
+
+        NotificationEmailRequest request = new NotificationEmailRequest();
+        request.setTo(user.getEmail()); // ✅ Email réel récupéré dynamiquement
+        request.setSubject("Nouveau contrat créé");
+        request.setBody("Votre contrat a été créé et prendra fin le " + contract.getEndDate() + ".");
+        notificationClient.sendEmail(request);
     }
 }
