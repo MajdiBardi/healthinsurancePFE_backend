@@ -1,6 +1,7 @@
 package com.pfe.payment.controllers;
 
 import com.pfe.payment.dtos.ManualPaymentRequest;
+import com.pfe.payment.dtos.TransactionRequest;
 import com.pfe.payment.entities.Transaction;
 import com.pfe.payment.services.PaymentService;
 import com.pfe.payment.services.TransactionService;
@@ -45,4 +46,12 @@ public class PaymentController {
         paymentService.handlePaymeeCallback(orderId, txId);
         return ResponseEntity.ok().build();
     }
+    @PostMapping("/transactions")
+    public ResponseEntity<?> createTransaction(@RequestBody TransactionRequest request) {
+        // Tu peux appeler transactionService ici si tu veux réellement enregistrer une transaction
+        System.out.println("✅ Transaction received: " + request);
+        return ResponseEntity.ok("Transaction enregistrée");
+    }
+
+
 }

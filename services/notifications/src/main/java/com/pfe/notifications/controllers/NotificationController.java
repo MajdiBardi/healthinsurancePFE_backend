@@ -2,8 +2,6 @@ package com.pfe.notifications.controllers;
 
 import com.pfe.notifications.dto.NotificationRequest;
 import com.pfe.notifications.services.NotificationService;
-import com.pfe.notifications.dto.NotificationRequest;
-import com.pfe.notifications.services.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
