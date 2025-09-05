@@ -13,7 +13,7 @@
         <module name="gateway" />
         <module name="notifications" />
       </profile>
-      <profile name="Annotation profile for User" enabled="true">
+      <profile name="Annotation profile for contract" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
