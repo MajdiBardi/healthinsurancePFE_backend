@@ -29,4 +29,11 @@ public class Contract {
 
     @Column(nullable = false)
     private Double montant;  // ✅ Nouveau champ ajouté
+
+    // Champs pour signature électronique
+    private String clientSignature; // Signature du client (base64 ou hash)
+    private String insurerSignature; // Signature de l'assureur (base64 ou hash)
+    private LocalDate clientSignedAt; // Date de signature du client
+    private LocalDate insurerSignedAt; // Date de signature de l'assureur
+    private Boolean isFullySigned; // Indique si le contrat est entièrement signé
 }

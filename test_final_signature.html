@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Final Signature - Rôles</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; border-radius: 5px; }
+        button { padding: 10px 15px; margin: 5px; background: #007bff; color: white; border: none; border-radius: 3px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        .result { margin-top: 10px; padding: 10px; background: #f8f9fa; border-radius: 3px; }
+        .error { background: #f8d7da; color: #721c24; }
+        .success { background: #d4edda; color: #155724; }
+        .info { background: #d1ecf1; color: #0c5460; }
+        .warning { background: #fff3cd; color: #856404; }
+    </style>
+</head>
+<body>
+    <h1>🎯 Test Final Signature - Rôles</h1>
+    
+    <div class="test-section">
+        <h3>1. Informations utilisateur</h3>
+        <button onclick="showUserInfo()">Afficher mes informations</button>
+        <div id="userInfo" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>2. Test signature CLIENT</h3>
+        <input type="number" id="contractId" placeholder="ID du contrat" value="46">
+        <button onclick="testClientSignature()">Tester comme CLIENT</button>
+        <div id="clientResult" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>3. Test signature INSURER</h3>
+        <button onclick="testInsurerSignature()">Tester comme INSURER</button>
+        <div id="insurerResult" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>4. Vérification finale</h3>
+        <button onclick="checkFinalStatus()">Vérifier le statut final</button>
+        <div id="finalResult" class="result"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8222/api';
+        const TOKEN = localStorage.getItem('token') || 'your-token-here';
+        
+        async function makeRequest(url, options = {}) {
+            try {
+                const response = await fetch(url, {
+                    ...options,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${TOKEN}`,
+                        ...options.headers
+                    }
+                });
+                
+                const data = await response.json();
+                return { success: response.ok, data, status: response.status };
+            } catch (error) {
+                return { success: false, error: error.message };
+            }
+        }
+        
+        function showUserInfo() {
+            const resultDiv = document.getElementById('userInfo');
+            
+            try {
+                const tokenParts = TOKEN.split('.');
+                if (tokenParts.length === 3) {
+                    const payload = JSON.parse(atob(tokenParts[1]));
+                    const roles = payload.realm_access?.roles || [];
+                    
+                    resultDiv.innerHTML = `
+                        <div class="info">
+                            <strong>Informations de l'utilisateur:</strong><br>
+                            <strong>ID:</strong> ${payload.sub || 'N/A'}<br>
+                            <strong>Nom:</strong> ${payload.preferred_username || 'N/A'}<br>
+                            <strong>Rôles:</strong> ${roles.join(', ')}<br>
+                            <strong>Rôle principal:</strong> ${roles.includes('ADMIN') ? 'ADMIN' : roles.includes('INSURER') ? 'INSURER' : roles.includes('CLIENT') ? 'CLIENT' : 'UNKNOWN'}
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `<div class="error">❌ Token JWT invalide</div>`;
+                }
+            } catch (e) {
+                resultDiv.innerHTML = `<div class="error">❌ Erreur lors du décodage du token: ${e.message}</div>`;
+            }
+        }
+        
+        async function testClientSignature() {
+            const contractId = document.getElementById('contractId').value;
+            const resultDiv = document.getElementById('clientResult');
+            
+            resultDiv.innerHTML = 'Test signature CLIENT...';
+            
+            // Créer une signature de test
+            const canvas = document.createElement('canvas');
+            canvas.width = 200;
+            canvas.height = 80;
+            const ctx = canvas.getContext('2d');
+            
+            ctx.font = '20px Arial';
+            ctx.fillText('CLIENT TEST', 10, 40);
+            
+            const signature = canvas.toDataURL('image/jpeg', 0.7);
+            
+            console.log('Test CLIENT - Signature length:', signature.length);
+            
+            const result = await makeRequest(`${API_BASE}/contracts/${contractId}/sign`, {
+                method: 'POST',
+                body: JSON.stringify({ 
+                    signature: signature,
+                    userRole: 'CLIENT'
+                })
+            });
+            
+            if (result.success) {
+                resultDiv.innerHTML = `<div class="success">✅ Test CLIENT réussi: ${JSON.stringify(result.data, null, 2)}</div>`;
+            } else {
+                resultDiv.innerHTML = `<div class="error">❌ Erreur CLIENT: ${JSON.stringify(result.data || result.error, null, 2)}</div>`;
+            }
+        }
+        
+        async function testInsurerSignature() {
+            const contractId = document.getElementById('contractId').value;
+            const resultDiv = document.getElementById('insurerResult');
+            
+            resultDiv.innerHTML = 'Test signature INSURER...';
+            
+            // Créer une signature de test
+            const canvas = document.createElement('canvas');
+            canvas.width = 200;
+            canvas.height = 80;
+            const ctx = canvas.getContext('2d');
+            
+            ctx.font = '20px Arial';
+            ctx.fillText('INSURER TEST', 10, 40);
+            
+            const signature = canvas.toDataURL('image/jpeg', 0.7);
+            
+            console.log('Test INSURER - Signature length:', signature.length);
+            
+            const result = await makeRequest(`${API_BASE}/contracts/${contractId}/sign`, {
+                method: 'POST',
+                body: JSON.stringify({ 
+                    signature: signature,
+                    userRole: 'INSURER'
+                })
+            });
+            
+            if (result.success) {
+                resultDiv.innerHTML = `<div class="success">✅ Test INSURER réussi: ${JSON.stringify(result.data, null, 2)}</div>`;
+            } else {
+                resultDiv.innerHTML = `<div class="error">❌ Erreur INSURER: ${JSON.stringify(result.data || result.error, null, 2)}</div>`;
+            }
+        }
+        
+        async function checkFinalStatus() {
+            const contractId = document.getElementById('contractId').value;
+            const resultDiv = document.getElementById('finalResult');
+            
+            resultDiv.innerHTML = 'Vérification du statut final...';
+            
+            const result = await makeRequest(`${API_BASE}/contracts/${contractId}/debug-signatures`);
+            
+            if (result.success) {
+                const data = result.data;
+                const isFullySigned = data.isFullySigned;
+                const clientSigned = data.clientSignature.includes('PRÉSENTE');
+                const insurerSigned = data.insurerSignature.includes('PRÉSENTE');
+                
+                let statusClass = 'error';
+                let statusText = '❌ PROBLÈME DÉTECTÉ';
+                
+                if (isFullySigned && clientSigned && insurerSigned) {
+                    statusClass = 'success';
+                    statusText = '✅ TOUT FONCTIONNE CORRECTEMENT - Contrat entièrement signé';
+                } else if (clientSigned && insurerSigned && !isFullySigned) {
+                    statusClass = 'warning';
+                    statusText = '⚠️ Signatures présentes mais statut non mis à jour';
+                } else if (clientSigned && !insurerSigned) {
+                    statusClass = 'info';
+                    statusText = 'ℹ️ Seule la signature CLIENT est présente';
+                } else if (!clientSigned && insurerSigned) {
+                    statusClass = 'info';
+                    statusText = 'ℹ️ Seule la signature INSURER est présente';
+                } else {
+                    statusClass = 'info';
+                    statusText = 'ℹ️ Aucune signature présente';
+                }
+                
+                resultDiv.innerHTML = `
+                    <div class="${statusClass}">
+                        <strong>${statusText}</strong><br>
+                        <strong>Détails:</strong><br>
+                        ${JSON.stringify(data, null, 2)}
+                    </div>
+                `;
+            } else {
+                resultDiv.innerHTML = `<div class="error">❌ Erreur: ${JSON.stringify(result.data || result.error, null, 2)}</div>`;
+            }
+        }
+        
+        // Afficher les infos au chargement
+        document.addEventListener('DOMContentLoaded', function() {
+            showUserInfo();
+        });
+    </script>
+</body>
+</html>

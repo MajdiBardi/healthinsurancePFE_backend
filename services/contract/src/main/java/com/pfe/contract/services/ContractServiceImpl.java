@@ -49,6 +49,23 @@ public class ContractServiceImpl implements ContractService {
         existing.setEndDate(updatedContract.getEndDate());
         existing.setMontant(updatedContract.getMontant());
         existing.setStatus(updatedContract.getStatus());
+        
+        // Mettre à jour les champs de signature
+        if (updatedContract.getClientSignature() != null) {
+            existing.setClientSignature(updatedContract.getClientSignature());
+        }
+        if (updatedContract.getInsurerSignature() != null) {
+            existing.setInsurerSignature(updatedContract.getInsurerSignature());
+        }
+        if (updatedContract.getClientSignedAt() != null) {
+            existing.setClientSignedAt(updatedContract.getClientSignedAt());
+        }
+        if (updatedContract.getInsurerSignedAt() != null) {
+            existing.setInsurerSignedAt(updatedContract.getInsurerSignedAt());
+        }
+        if (updatedContract.getIsFullySigned() != null) {
+            existing.setIsFullySigned(updatedContract.getIsFullySigned());
+        }
 
         return contractRepository.save(existing);
     }
@@ -87,6 +104,14 @@ public class ContractServiceImpl implements ContractService {
         dto.setEndDate(contract.getEndDate());
         dto.setMontant(contract.getMontant());
         dto.setStatus(contract.getStatus());
+        
+        // Ajouter les informations de signature
+        dto.setClientSignature(contract.getClientSignature());
+        dto.setInsurerSignature(contract.getInsurerSignature());
+        dto.setClientSignedAt(contract.getClientSignedAt());
+        dto.setInsurerSignedAt(contract.getInsurerSignedAt());
+        dto.setIsFullySigned(contract.getIsFullySigned());
+        
         return dto;
     }
 

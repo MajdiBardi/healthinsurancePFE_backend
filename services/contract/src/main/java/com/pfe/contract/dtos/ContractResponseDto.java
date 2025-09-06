@@ -27,4 +27,11 @@ public class ContractResponseDto {
     private String beneficiaryName;
 
     private Double montant;  // ✅ Nouveau champ ajouté
+
+    // Champs pour signature électronique
+    private String clientSignature;
+    private String insurerSignature;
+    private LocalDate clientSignedAt;
+    private LocalDate insurerSignedAt;
+    private Boolean isFullySigned;
 }
