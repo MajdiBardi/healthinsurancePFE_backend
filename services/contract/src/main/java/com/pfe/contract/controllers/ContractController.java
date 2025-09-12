@@ -43,7 +43,7 @@ public class ContractController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'INSURER')")
     public ResponseEntity<Contract> updateContract(@PathVariable Long id, @RequestBody ContractRequestDto dto) {
         Contract contract = mapDtoToEntity(dto);
         return ResponseEntity.ok(contractService.updateContract(id, contract));
@@ -56,7 +56,7 @@ public class ContractController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'INSURER')")
     public ResponseEntity<Void> deleteContract(@PathVariable Long id) {
         contractService.deleteContract(id);
         return ResponseEntity.noContent().build();

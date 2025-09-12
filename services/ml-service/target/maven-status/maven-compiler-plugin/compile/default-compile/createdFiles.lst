@@ -1,0 +1,10 @@
+com\pfe\mlservice\controllers\MlPredictionController.class
+com\pfe\mlservice\dtos\ClusteringRequestDto.class
+com\pfe\mlservice\dtos\ClusteringResponseDto.class
+com\pfe\mlservice\services\MlClusteringService.class
+com\pfe\mlservice\controllers\MlAnalyticsController.class
+com\pfe\mlservice\dtos\PredictionRequestDto.class
+com\pfe\mlservice\services\MlPredictionService.class
+com\pfe\mlservice\controllers\MlClusteringController.class
+com\pfe\mlservice\dtos\PredictionResponseDto.class
+com\pfe\mlservice\MlServiceApplication.class

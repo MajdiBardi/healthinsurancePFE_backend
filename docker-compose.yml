@@ -130,6 +130,28 @@ services:
       - microservices-net
     restart: unless-stopped
 
+  # Base de données pour les données ML
+  postgres-ml:
+    container_name: ms_pg_ml
+    image: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 191jMT1019MB..
+      POSTGRES_DB: DW_Assurance
+      PGDATA: /data/postgres
+    volumes:
+      - postgres_ml:/data/postgres
+    ports:
+      - "5433:5432"
+    networks:
+      - microservices-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
 
 
 networks:
@@ -140,3 +162,4 @@ volumes:
   postgres:
   pgadmin:
   mongo:
+  postgres_ml:

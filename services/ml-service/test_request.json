@@ -1,0 +1,16 @@
+{
+  "capital_initial": 25000.0,
+  "rendement_annuel": 2.5,
+  "duree_contrat_jours": 3650,
+  "revenu_annuel": 40000.0,
+  "score_risque": 0.4,
+  "age_client": 45,
+  "nb_transactions": 3,
+  "montant_versements": 12000.0,
+  "montant_rachats": 500.0,
+  "ratio_rachats": 0.04,
+  "nb_alertes": 1,
+  "nb_alertes_eleve": 0,
+  "type_profil_prudent": false,
+  "type_profil_equilibre": false
+}

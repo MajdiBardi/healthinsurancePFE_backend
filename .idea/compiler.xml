@@ -9,11 +9,12 @@
         <outputRelativeToContentRoot value="true" />
         <module name="config-server" />
         <module name="payment" />
+        <module name="ml-service" />
         <module name="discovery" />
         <module name="gateway" />
         <module name="notifications" />
       </profile>
-      <profile name="Annotation profile for contract" enabled="true">
+      <profile name="Annotation profile for User" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
@@ -35,6 +36,7 @@
       <module name="contract" options="-parameters" />
       <module name="discovery" options="-parameters" />
       <module name="gateway" options="-parameters" />
+      <module name="ml-service" options="-parameters" />
       <module name="notifications" options="-parameters" />
       <module name="payment" options="-parameters" />
       <module name="user" options="-parameters" />

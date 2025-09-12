@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test API ML Service</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .test-section { margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 8px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .info { background-color: #d1ecf1; border-color: #bee5eb; }
+        button { padding: 10px 20px; margin: 5px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background-color: #0056b3; }
+        pre { background-color: #f8f9fa; padding: 10px; border-radius: 4px; overflow-x: auto; }
+        .response { margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Test API ML Service</h1>
+        <p>Cette page teste si le service ML utilise vraiment les vrais modèles ou les règles de fallback.</p>
+
+        <!-- Test de Prédiction -->
+        <div class="test-section">
+            <h2>🔮 Test de Prédiction (Logistic Regression)</h2>
+            <p>Teste l'API de prédiction avec des données d'exemple.</p>
+            <button onclick="testPrediction()">Tester la Prédiction</button>
+            <div id="predictionResult" class="response"></div>
+        </div>
+
+        <!-- Test de Clustering -->
+        <div class="test-section">
+            <h2>🧠 Test de Clustering (K-Means)</h2>
+            <p>Teste l'API de clustering avec différents profils de clients.</p>
+            <button onclick="testClustering()">Tester le Clustering</button>
+            <div id="clusteringResult" class="response"></div>
+        </div>
+
+        <!-- Test de Santé -->
+        <div class="test-section">
+            <h2>🏥 Test de Santé du Service</h2>
+            <p>Vérifie si le service ML est accessible.</p>
+            <button onclick="testHealth()">Tester la Santé</button>
+            <div id="healthResult" class="response"></div>
+        </div>
+
+        <!-- Analyse des Résultats -->
+        <div class="test-section">
+            <h2>📊 Analyse des Résultats</h2>
+            <div id="analysisResult"></div>
+        </div>
+    </div>
+
+    <script>
+        const ML_SERVICE_URL = 'http://localhost:8086';
+
+        // Données de test pour la prédiction
+        const predictionTestData = {
+            capital_initial: 25000.0,
+            rendement_annuel: 2.5,
+            duree_contrat_jours: 3650,
+            revenu_annuel: 40000.0,
+            score_risque: 0.4,
+            age_client: 45,
+            nb_transactions: 3,
+            montant_versements: 12000.0,
+            montant_rachats: 500.0,
+            ratio_rachats: 0.04,
+            nb_alertes: 1,
+            nb_alertes_eleve: 0,
+            type_profil_prudent: false,
+            type_profil_equilibre: false
+        };
+
+        // Données de test pour le clustering
+        const clusteringTestData = {
+            capital_initial: 35000.0,
+            rendement_annuel: 3.5,
+            revenu_annuel: 45000.0,
+            score_risque: 0.3,
+            montant_versements: 15000.0,
+            montant_rachats: 500.0,
+            ratio_rachats: 0.03,
+            age_client: 45,
+            nb_transactions: 2,
+            nb_alertes: 1,
+            nb_alertes_eleve: 0,
+            type_profil_prudent: true,
+            type_profil_equilibre: false
+        };
+
+        async function testPrediction() {
+            const resultDiv = document.getElementById('predictionResult');
+            resultDiv.innerHTML = '<p>🔄 Test en cours...</p>';
+            
+            try {
+                const response = await fetch(`${ML_SERVICE_URL}/api/ml/prediction/rachat-anticipe`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(predictionTestData)
+                });
+
+                const result = await response.json();
+                
+                let statusClass = 'info';
+                let statusIcon = 'ℹ️';
+                
+                if (response.ok) {
+                    statusClass = 'success';
+                    statusIcon = '✅';
+                } else {
+                    statusClass = 'error';
+                    statusIcon = '❌';
+                }
+
+                resultDiv.innerHTML = `
+                    <div class="${statusClass}">
+                        <h3>${statusIcon} Résultat de la Prédiction</h3>
+                        <p><strong>Statut HTTP:</strong> ${response.status}</p>
+                        <p><strong>Rachat anticipé prédit:</strong> ${result.rachatAnticipe ? 'OUI' : 'NON'}</p>
+                        <p><strong>Probabilité:</strong> ${(result.probabiliteRachat * 100).toFixed(2)}%</p>
+                        <p><strong>Niveau de risque:</strong> ${result.niveauRisque}</p>
+                        <p><strong>Recommandation:</strong> ${result.recommandation}</p>
+                        <p><strong>Message:</strong> ${result.message}</p>
+                        <h4>Réponse complète:</h4>
+                        <pre>${JSON.stringify(result, null, 2)}</pre>
+                    </div>
+                `;
+                
+                analyzeResults('prediction', result);
+                
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        <h3>❌ Erreur lors du test de prédiction</h3>
+                        <p><strong>Erreur:</strong> ${error.message}</p>
+                        <p>Vérifiez que le service ML est démarré sur le port 8086.</p>
+                    </div>
+                `;
+            }
+        }
+
+        async function testClustering() {
+            const resultDiv = document.getElementById('clusteringResult');
+            resultDiv.innerHTML = '<p>🔄 Test en cours...</p>';
+            
+            try {
+                const response = await fetch(`${ML_SERVICE_URL}/api/ml/clustering/segment-client`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(clusteringTestData)
+                });
+
+                const result = await response.json();
+                
+                let statusClass = 'info';
+                let statusIcon = 'ℹ️';
+                
+                if (response.ok) {
+                    statusClass = 'success';
+                    statusIcon = '✅';
+                } else {
+                    statusClass = 'error';
+                    statusIcon = '❌';
+                }
+
+                resultDiv.innerHTML = `
+                    <div class="${statusClass}">
+                        <h3>${statusIcon} Résultat du Clustering</h3>
+                        <p><strong>Statut HTTP:</strong> ${response.status}</p>
+                        <p><strong>Cluster ID:</strong> ${result.clusterId}</p>
+                        <p><strong>Nom du cluster:</strong> ${result.nomCluster}</p>
+                        <p><strong>Description:</strong> ${result.description}</p>
+                        <p><strong>Profil client:</strong> ${result.profilClient}</p>
+                        <p><strong>Recommandations:</strong> ${result.recommandations}</p>
+                        <p><strong>Score d'affinité:</strong> ${(result.scoreAffinite * 100).toFixed(2)}%</p>
+                        <h4>Réponse complète:</h4>
+                        <pre>${JSON.stringify(result, null, 2)}</pre>
+                    </div>
+                `;
+                
+                analyzeResults('clustering', result);
+                
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        <h3>❌ Erreur lors du test de clustering</h3>
+                        <p><strong>Erreur:</strong> ${error.message}</p>
+                        <p>Vérifiez que le service ML est démarré sur le port 8086.</p>
+                    </div>
+                `;
+            }
+        }
+
+        async function testHealth() {
+            const resultDiv = document.getElementById('healthResult');
+            resultDiv.innerHTML = '<p>🔄 Test en cours...</p>';
+            
+            try {
+                const response = await fetch(`${ML_SERVICE_URL}/api/ml/prediction/health`);
+                const result = await response.text();
+                
+                let statusClass = response.ok ? 'success' : 'error';
+                let statusIcon = response.ok ? '✅' : '❌';
+                
+                resultDiv.innerHTML = `
+                    <div class="${statusClass}">
+                        <h3>${statusIcon} Test de Santé</h3>
+                        <p><strong>Statut HTTP:</strong> ${response.status}</p>
+                        <p><strong>Réponse:</strong> ${result}</p>
+                    </div>
+                `;
+                
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        <h3>❌ Service ML non accessible</h3>
+                        <p><strong>Erreur:</strong> ${error.message}</p>
+                        <p>Le service ML n'est pas démarré ou n'est pas accessible sur le port 8086.</p>
+                    </div>
+                `;
+            }
+        }
+
+        function analyzeResults(type, result) {
+            const analysisDiv = document.getElementById('analysisResult');
+            let analysis = analysisDiv.innerHTML;
+            
+            if (type === 'prediction') {
+                const isUsingRealModel = result.message && result.message.includes('Logistic Regression');
+                const isUsingFallback = result.message && result.message.includes('fallback');
+                
+                analysis += `
+                    <h3>🔍 Analyse de la Prédiction</h3>
+                    <p><strong>Utilise le vrai modèle:</strong> ${isUsingRealModel ? '✅ OUI' : '❌ NON'}</p>
+                    <p><strong>Utilise le fallback:</strong> ${isUsingFallback ? '⚠️ OUI' : '❌ NON'}</p>
+                    <p><strong>Type de prédiction:</strong> ${isUsingRealModel ? 'Modèle Python entraîné' : isUsingFallback ? 'Règles métier (fallback)' : 'Inconnu'}</p>
+                `;
+            } else if (type === 'clustering') {
+                const isUsingRealModel = result.description && result.description.includes('K-Means');
+                const isUsingFallback = result.description && result.description.includes('fallback');
+                
+                analysis += `
+                    <h3>🔍 Analyse du Clustering</h3>
+                    <p><strong>Utilise le vrai modèle:</strong> ${isUsingRealModel ? '✅ OUI' : '❌ NON'}</p>
+                    <p><strong>Utilise le fallback:</strong> ${isUsingFallback ? '⚠️ OUI' : '❌ NON'}</p>
+                    <p><strong>Type de clustering:</strong> ${isUsingRealModel ? 'Modèle Python K-Means' : isUsingFallback ? 'Règles métier (fallback)' : 'Inconnu'}</p>
+                `;
+            }
+            
+            analysisDiv.innerHTML = analysis;
+        }
+
+        // Test automatique au chargement de la page
+        window.onload = function() {
+            testHealth();
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Simple ML Service</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            font-family: monospace;
+        }
+        .success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <h1>🤖 Test Simple du Service ML</h1>
+    
+    <div class="container">
+        <h2>Test de Connectivité</h2>
+        <button onclick="testHealth()">🔍 Tester Health Check</button>
+        <button onclick="testPrediction()">🔮 Test Prédiction Simple</button>
+        <button onclick="testClustering()">👥 Test Clustering Simple</button>
+        <div id="result" class="result" style="display: none;"></div>
+    </div>
+
+    <script>
+        const ML_SERVICE_URL = 'http://localhost:8086';
+
+        async function testHealth() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'result';
+            resultDiv.textContent = '⏳ Test de connectivité...';
+
+            try {
+                const response = await fetch(`${ML_SERVICE_URL}/api/ml/prediction/health`);
+                
+                if (response.ok) {
+                    const text = await response.text();
+                    resultDiv.className = 'result success';
+                    resultDiv.textContent = `✅ SERVICE ML CONNECTÉ
+
+Status: ${response.status} ${response.statusText}
+Réponse: ${text}
+URL: ${ML_SERVICE_URL}`;
+                } else {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = `❌ ERREUR DE CONNEXION
+
+Erreur: ${error.message}
+URL testée: ${ML_SERVICE_URL}
+
+Vérifiez que:
+1. Le service ML est démarré
+2. Le port 8086 est libre
+3. Aucun firewall ne bloque la connexion`;
+            }
+        }
+
+        async function testPrediction() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'result';
+            resultDiv.textContent = '⏳ Test de prédiction...';
+
+            try {
+                const testData = {
+                    capitalInitial: 25000,
+                    rendementAnnuel: 2.5,
+                    dureeContratJours: 3650,
+                    revenuAnnuel: 40000,
+                    scoreRisque: 0.4,
+                    ageClient: 45,
+                    nbTransactions: 3,
+                    montantVersements: 12000,
+                    montantRachats: 500,
+                    ratioRachats: 0.04,
+                    nbAlertes: 1,
+                    nbAlertesEleve: 0,
+                    typeProfilPrudent: false,
+                    typeProfilEquilibre: false
+                };
+
+                const response = await fetch(`${ML_SERVICE_URL}/api/ml/prediction/rachat-anticipe`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(testData)
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    resultDiv.className = 'result success';
+                    resultDiv.textContent = `✅ PRÉDICTION RÉUSSIE
+
+Résultat:
+• Rachat Anticipé: ${result.rachatAnticipe ? 'OUI' : 'NON'}
+• Probabilité: ${(result.probabiliteRachat * 100).toFixed(2)}%
+• Niveau de Risque: ${result.niveauRisque}
+• Recommandation: ${result.recommandation}
+
+Données testées:
+${JSON.stringify(testData, null, 2)}`;
+                } else {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = `❌ ERREUR DE PRÉDICTION
+
+Erreur: ${error.message}
+
+Vérifiez que:
+1. Le service ML est démarré
+2. Les modèles Python sont disponibles
+3. Python est installé et accessible`;
+            }
+        }
+
+        async function testClustering() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'result';
+            resultDiv.textContent = '⏳ Test de clustering...';
+
+            try {
+                const testData = {
+                    capitalInitial: 50000,
+                    rendementAnnuel: 3.2,
+                    revenuAnnuel: 60000,
+                    scoreRisque: 0.6,
+                    montantVersements: 15000,
+                    montantRachats: 2000,
+                    ratioRachats: 0.13,
+                    ageClient: 38,
+                    nbTransactions: 8,
+                    nbAlertes: 2,
+                    nbAlertesEleve: 1,
+                    typeProfilPrudent: false,
+                    typeProfilEquilibre: true
+                };
+
+                const response = await fetch(`${ML_SERVICE_URL}/api/ml/clustering/segment-client`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(testData)
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    resultDiv.className = 'result success';
+                    resultDiv.textContent = `✅ CLUSTERING RÉUSSI
+
+Résultat:
+• Cluster ID: ${result.clusterId}
+• Nom du Cluster: ${result.nomCluster}
+• Description: ${result.description}
+• Profil Client: ${result.profilClient}
+• Recommandations: ${result.recommandations}
+• Score d'Affinité: ${(result.scoreAffinite * 100).toFixed(1)}%
+
+Données testées:
+${JSON.stringify(testData, null, 2)}`;
+                } else {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = `❌ ERREUR DE CLUSTERING
+
+Erreur: ${error.message}
+
+Vérifiez que:
+1. Le service ML est démarré
+2. Les modèles de clustering sont disponibles
+3. Python est installé et accessible`;
+            }
+        }
+
+        // Test automatique au chargement
+        window.addEventListener('load', () => {
+            console.log('Page chargée, test automatique de connectivité...');
+            setTimeout(testHealth, 1000);
+        });
+    </script>
+</body>
+</html>

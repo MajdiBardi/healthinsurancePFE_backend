@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test APIs ML - PFE</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        h1, h2 {
+            color: #333;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            font-family: monospace;
+        }
+        .success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>🤖 Test des APIs ML - PFE</h1>
+    
+    <div class="grid">
+        <!-- Test Prédiction -->
+        <div class="container">
+            <h2>📊 Test Prédiction de Rachat Anticipé</h2>
+            <form id="predictionForm">
+                <div class="form-group">
+                    <label>Capital Initial:</label>
+                    <input type="number" id="capitalInitial" value="25000" step="1000">
+                </div>
+                <div class="form-group">
+                    <label>Rendement Annuel (%):</label>
+                    <input type="number" id="rendementAnnuel" value="2.5" step="0.1">
+                </div>
+                <div class="form-group">
+                    <label>Durée Contrat (jours):</label>
+                    <input type="number" id="dureeContratJours" value="3650">
+                </div>
+                <div class="form-group">
+                    <label>Revenu Annuel:</label>
+                    <input type="number" id="revenuAnnuel" value="40000" step="1000">
+                </div>
+                <div class="form-group">
+                    <label>Score de Risque:</label>
+                    <input type="number" id="scoreRisque" value="0.4" step="0.1" min="0" max="1">
+                </div>
+                <div class="form-group">
+                    <label>Âge Client:</label>
+                    <input type="number" id="ageClient" value="45">
+                </div>
+                <div class="form-group">
+                    <label>Nombre de Transactions:</label>
+                    <input type="number" id="nbTransactions" value="3">
+                </div>
+                <div class="form-group">
+                    <label>Montant Versements:</label>
+                    <input type="number" id="montantVersements" value="12000" step="1000">
+                </div>
+                <div class="form-group">
+                    <label>Montant Rachats:</label>
+                    <input type="number" id="montantRachats" value="500" step="100">
+                </div>
+                <div class="form-group">
+                    <label>Ratio Rachats:</label>
+                    <input type="number" id="ratioRachats" value="0.04" step="0.01">
+                </div>
+                <div class="form-group">
+                    <label>Nombre d'Alertes:</label>
+                    <input type="number" id="nbAlertes" value="1">
+                </div>
+                <div class="form-group">
+                    <label>Nombre d'Alertes Élevées:</label>
+                    <input type="number" id="nbAlertesEleve" value="0">
+                </div>
+                <div class="form-group">
+                    <label>Type de Profil:</label>
+                    <select id="typeProfil">
+                        <option value="prudent">Prudent</option>
+                        <option value="equilibre">Équilibré</option>
+                        <option value="agressif">Agressif</option>
+                    </select>
+                </div>
+                <button type="button" onclick="testPrediction()">🔮 Prédire Rachat Anticipé</button>
+            </form>
+            <div id="predictionResult" class="result" style="display: none;"></div>
+        </div>
+
+        <!-- Test Clustering -->
+        <div class="container">
+            <h2>👥 Test Segmentation Client</h2>
+            <form id="clusteringForm">
+                <div class="form-group">
+                    <label>Capital Initial:</label>
+                    <input type="number" id="clusterCapitalInitial" value="50000" step="1000">
+                </div>
+                <div class="form-group">
+                    <label>Rendement Annuel (%):</label>
+                    <input type="number" id="clusterRendementAnnuel" value="3.2" step="0.1">
+                </div>
+                <div class="form-group">
+                    <label>Revenu Annuel:</label>
+                    <input type="number" id="clusterRevenuAnnuel" value="60000" step="1000">
+                </div>
+                <div class="form-group">
+                    <label>Score de Risque:</label>
+                    <input type="number" id="clusterScoreRisque" value="0.6" step="0.1" min="0" max="1">
+                </div>
+                <div class="form-group">
+                    <label>Montant Versements:</label>
+                    <input type="number" id="clusterMontantVersements" value="15000" step="1000">
+                </div>
+                <div class="form-group">
+                    <label>Montant Rachats:</label>
+                    <input type="number" id="clusterMontantRachats" value="2000" step="100">
+                </div>
+                <div class="form-group">
+                    <label>Ratio Rachats:</label>
+                    <input type="number" id="clusterRatioRachats" value="0.13" step="0.01">
+                </div>
+                <div class="form-group">
+                    <label>Âge Client:</label>
+                    <input type="number" id="clusterAgeClient" value="38">
+                </div>
+                <div class="form-group">
+                    <label>Nombre de Transactions:</label>
+                    <input type="number" id="clusterNbTransactions" value="8">
+                </div>
+                <div class="form-group">
+                    <label>Nombre d'Alertes:</label>
+                    <input type="number" id="clusterNbAlertes" value="2">
+                </div>
+                <div class="form-group">
+                    <label>Nombre d'Alertes Élevées:</label>
+                    <input type="number" id="clusterNbAlertesEleve" value="1">
+                </div>
+                <div class="form-group">
+                    <label>Type de Profil:</label>
+                    <select id="clusterTypeProfil">
+                        <option value="prudent">Prudent</option>
+                        <option value="equilibre" selected>Équilibré</option>
+                        <option value="agressif">Agressif</option>
+                    </select>
+                </div>
+                <button type="button" onclick="testClustering()">🎯 Segmenter Client</button>
+            </form>
+            <div id="clusteringResult" class="result" style="display: none;"></div>
+        </div>
+    </div>
+
+    <!-- Test Analytics -->
+    <div class="container">
+        <h2>📈 Test Analytics Dashboard</h2>
+        <button type="button" onclick="testAnalytics()">📊 Charger Dashboard</button>
+        <button type="button" onclick="testModelPerformance()">⚡ Performance Modèles</button>
+        <div id="analyticsResult" class="result" style="display: none;"></div>
+    </div>
+
+    <script>
+        const ML_SERVICE_URL = 'http://localhost:8086';
+
+        async function testPrediction() {
+            const resultDiv = document.getElementById('predictionResult');
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'result';
+            resultDiv.textContent = '⏳ Prédiction en cours...';
+
+            try {
+                const typeProfil = document.getElementById('typeProfil').value;
+                const requestData = {
+                    capitalInitial: parseFloat(document.getElementById('capitalInitial').value),
+                    rendementAnnuel: parseFloat(document.getElementById('rendementAnnuel').value),
+                    dureeContratJours: parseInt(document.getElementById('dureeContratJours').value),
+                    revenuAnnuel: parseFloat(document.getElementById('revenuAnnuel').value),
+                    scoreRisque: parseFloat(document.getElementById('scoreRisque').value),
+                    ageClient: parseInt(document.getElementById('ageClient').value),
+                    nbTransactions: parseInt(document.getElementById('nbTransactions').value),
+                    montantVersements: parseFloat(document.getElementById('montantVersements').value),
+                    montantRachats: parseFloat(document.getElementById('montantRachats').value),
+                    ratioRachats: parseFloat(document.getElementById('ratioRachats').value),
+                    nbAlertes: parseInt(document.getElementById('nbAlertes').value),
+                    nbAlertesEleve: parseInt(document.getElementById('nbAlertesEleve').value),
+                    typeProfilPrudent: typeProfil === 'prudent',
+                    typeProfilEquilibre: typeProfil === 'equilibre'
+                };
+
+                const response = await fetch(`${ML_SERVICE_URL}/api/ml/prediction/rachat-anticipe`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(requestData)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const result = await response.json();
+                resultDiv.className = 'result success';
+                resultDiv.textContent = `✅ PRÉDICTION RÉUSSIE
+
+📊 Résultat:
+• Rachat Anticipé: ${result.rachatAnticipe ? 'OUI' : 'NON'}
+• Probabilité: ${(result.probabiliteRachat * 100).toFixed(2)}%
+• Niveau de Risque: ${result.niveauRisque}
+• Recommandation: ${result.recommandation}
+• Message: ${result.message}
+
+🔍 Données envoyées:
+${JSON.stringify(requestData, null, 2)}`;
+
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = `❌ ERREUR: ${error.message}
+
+Vérifiez que le service ML est démarré sur le port 8085.`;
+            }
+        }
+
+        async function testClustering() {
+            const resultDiv = document.getElementById('clusteringResult');
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'result';
+            resultDiv.textContent = '⏳ Segmentation en cours...';
+
+            try {
+                const typeProfil = document.getElementById('clusterTypeProfil').value;
+                const requestData = {
+                    capitalInitial: parseFloat(document.getElementById('clusterCapitalInitial').value),
+                    rendementAnnuel: parseFloat(document.getElementById('clusterRendementAnnuel').value),
+                    revenuAnnuel: parseFloat(document.getElementById('clusterRevenuAnnuel').value),
+                    scoreRisque: parseFloat(document.getElementById('clusterScoreRisque').value),
+                    montantVersements: parseFloat(document.getElementById('clusterMontantVersements').value),
+                    montantRachats: parseFloat(document.getElementById('clusterMontantRachats').value),
+                    ratioRachats: parseFloat(document.getElementById('clusterRatioRachats').value),
+                    ageClient: parseInt(document.getElementById('clusterAgeClient').value),
+                    nbTransactions: parseInt(document.getElementById('clusterNbTransactions').value),
+                    nbAlertes: parseInt(document.getElementById('clusterNbAlertes').value),
+                    nbAlertesEleve: parseInt(document.getElementById('clusterNbAlertesEleve').value),
+                    typeProfilPrudent: typeProfil === 'prudent',
+                    typeProfilEquilibre: typeProfil === 'equilibre'
+                };
+
+                const response = await fetch(`${ML_SERVICE_URL}/api/ml/clustering/segment-client`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(requestData)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const result = await response.json();
+                resultDiv.className = 'result success';
+                resultDiv.textContent = `✅ SEGMENTATION RÉUSSIE
+
+👥 Résultat:
+• Cluster ID: ${result.clusterId}
+• Nom du Cluster: ${result.nomCluster}
+• Description: ${result.description}
+• Profil Client: ${result.profilClient}
+• Recommandations: ${result.recommandations}
+• Score d'Affinité: ${(result.scoreAffinite * 100).toFixed(1)}%
+
+🔍 Données envoyées:
+${JSON.stringify(requestData, null, 2)}`;
+
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = `❌ ERREUR: ${error.message}
+
+Vérifiez que le service ML est démarré sur le port 8085.`;
+            }
+        }
+
+        async function testAnalytics() {
+            const resultDiv = document.getElementById('analyticsResult');
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'result';
+            resultDiv.textContent = '⏳ Chargement des analytics...';
+
+            try {
+                const response = await fetch(`${ML_SERVICE_URL}/api/ml/analytics/dashboard`);
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const result = await response.json();
+                resultDiv.className = 'result success';
+                resultDiv.textContent = `✅ ANALYTICS CHARGÉES
+
+📊 Métriques de Prédiction:
+• Accuracy: ${(result.predictionMetrics.accuracy * 100).toFixed(1)}%
+• F1-Score: ${(result.predictionMetrics.f1Score * 100).toFixed(1)}%
+• ROC AUC: ${result.predictionMetrics.rocAuc.toFixed(3)}
+• Prédictions Aujourd'hui: ${result.predictionMetrics.predictionsToday}
+• Total Prédictions: ${result.predictionMetrics.totalPredictions}
+
+👥 Métriques de Clustering:
+• Clusters: ${result.clusteringMetrics.totalClusters}
+• Silhouette Score: ${result.clusteringMetrics.silhouetteScore.toFixed(3)}
+• Total Clients: ${result.clusteringMetrics.totalClients}
+
+📈 Répartition des Clusters:
+${Object.entries(result.clusterDistribution).map(([cluster, count]) => `• ${cluster}: ${count} clients`).join('\n')}
+
+📊 Répartition des Prédictions:
+${Object.entries(result.predictionDistribution).map(([type, count]) => `• ${type}: ${count}`).join('\n')}
+
+🕒 Dernière Mise à Jour: ${result.lastUpdate}`;
+
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = `❌ ERREUR: ${error.message}
+
+Vérifiez que le service ML est démarré sur le port 8085.`;
+            }
+        }
+
+        async function testModelPerformance() {
+            const resultDiv = document.getElementById('analyticsResult');
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'result';
+            resultDiv.textContent = '⏳ Chargement des performances...';
+
+            try {
+                const response = await fetch(`${ML_SERVICE_URL}/api/ml/analytics/model-performance`);
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const result = await response.json();
+                resultDiv.className = 'result success';
+                resultDiv.textContent = `✅ PERFORMANCES CHARGÉES
+
+🏆 Meilleur Modèle: ${result.bestModel}
+🕒 Dernier Entraînement: ${result.lastTraining}
+
+📊 Modèles Disponibles:
+
+${Object.entries(result.models).map(([key, model]) => `
+🤖 ${model.name} (${key}):
+• Accuracy: ${(model.accuracy * 100).toFixed(1)}%
+• F1-Score: ${(model.f1Score * 100).toFixed(1)}%
+• ROC AUC: ${model.rocAuc.toFixed(3)}
+• Temps d'Entraînement: ${model.trainingTime}s
+• Statut: ${model.status}
+`).join('')}`;
+
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = `❌ ERREUR: ${error.message}
+
+Vérifiez que le service ML est démarré sur le port 8085.`;
+            }
+        }
+
+        // Test de connectivité au chargement
+        window.addEventListener('load', async () => {
+            try {
+                const response = await fetch(`${ML_SERVICE_URL}/api/ml/prediction/health`);
+                if (response.ok) {
+                    console.log('✅ Service ML connecté');
+                } else {
+                    console.warn('⚠️ Service ML non disponible');
+                }
+            } catch (error) {
+                console.warn('⚠️ Service ML non accessible:', error.message);
+            }
+        });
+    </script>
+</body>
+</html>
